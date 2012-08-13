@@ -136,6 +136,52 @@
         });
       }
     },
+        
+    /**
+      Creates a directory in the given path. 
+      cb(err, entry)
+      (Note that it will return error if the subpath does not exist).
+    */
+    mkdir : function(dirpath, cb){
+      var self = this;
+      traverse(this.root, dirname(dirpath), function(err, entry){
+        if(err || !entry.isDirectory){
+          cb(err || new Error('Path is not a directory'));
+        }else{
+          self._mkdir(entry, basename(dirpath), cb);
+        }
+      });
+    },
+    
+    _mkdir : function(root, dir, cb){
+      root.getDirectory(dir, {create:true}, function(entry){
+        cb(null, entry);
+      }, cb);
+    },
+    
+    /**
+      As mkdir but also creates all the folders in the dirpath if 
+      needed.
+      cb(err, entry).
+    */
+    mkpath : function(dirpath, cb){
+      var components = dirpath.split('/');
+      this._mkpath(this.root, components, cb);
+    },
+      
+    _mkpath : function(root, components, cb){
+      var self = this;
+      if (components[0] == '.' || components[0] == '') {
+        components = components.slice(1);
+      }
+      self._mkdir(root, components[0], function(err, entry){
+        if(entry && components.length){
+          self._mkpath(entry, components.slice(1), cb);
+        }else{
+          cb(err, entry);
+        }
+      });
+    },
     
     /**
       Reads the content of a directory at the given path.
