@@ -32,6 +32,7 @@
   }
   
   FS.prototype = {
+  
     /**
       rename(oldPath, newPath, callback)
     
@@ -194,28 +195,80 @@
         }else{
           var reader = entry.createReader();
           reader.readEntries(function(entries){
-            console.log(entries);
             cb(null, entries);
           }, cb);
         }
       });    
     },
     
-    mkdir : function(dirpath, cb){
+    /**
+      Changes the timestamps of a file or directory at the 
+      given path.
+    */
+    utimes : function(path, atime, mtime, cb){
       // TO IMPLEMENT;
     },
-    
-    readFile : function(filename, cb){
-      this.read(filename, cb);
+      
+    readFile : function(filename, encoding, cb){
+      this.read.apply(this, arguments);
     },
     
-    writeFile : function(filename, blob, cb){
-      this.write(filename, blob, cb);
+    readFileAsBlob : function (filename, cb) {
+      traverse(this.root, filename, function (err, entry) {
+        if(entry){
+          entry.file(function (blob) {
+            cb(null, blob);
+          }, cb);
+        }else{
+          cb(err);
+        }
+      });
+    },
+    
+    readFileAsUrl : function (filename, cb) {
+      traverse(this.root, filename, function (err, entry) {
+        if(entry){
+          cb(null, entry.toURL());
+        }else{
+          cb(err);
+        }
+      });
+    },
+    
+    writeFile : function(filename, data, cb){
+      var bb = new WebKitBlobBuilder();
+      bb.append(data); 
+      this.write(filename, bb.getBlob(), cb);
     },
     
     appendFile : function(filename, data, cb){
-      this.append(filename, data, cb);
-    }
+      var bb = new WebKitBlobBuilder();
+      bb.append(data);
+      this.append(filename, bb.getBlob(), cb);
+    },
+    
+    /**
+      Wipes the whole file system. 
+      
+      wipe(cb, [full])
+      
+      Use full = true if you want to wipe the root dir of the filesystem,
+      after doing this, the instance cannot be used anymore.
+    */
+    wipe : function (cb, full) {
+      var self = this, folder = self.root.fullPath;
+      self.root.removeRecursively(function(){
+        if(!full){
+          self.fs.root.getDirectory(folder, {create:true}, function (root) {
+            self.root = root;
+            self._availableBytes = self._grantedBytes;
+            cb();
+          }, cb);
+        }else{
+          cb();
+        }
+      }, cb);
+    } 
   }
   
   FS.prototype.remove = FS.prototype.unlink;
@@ -223,9 +276,11 @@
   //File.prototype.getAvailableBytes = function(cb) {
   //  cb(null, this._available_bytes);
   //}
-
-  //TODO: This currently reads a file just as text
-  FS.prototype.read = function (filename, cb) {
+  FS.prototype.read = function (filename, encoding, cb) {
+    if(arguments.length==2){
+      cb = encoding;
+      encoding = undefined;
+    }
     traverse(this.root, filename, function (err, entry) {
       if(entry){
         entry.file(function (file) {
@@ -233,36 +288,18 @@
           reader.onloadend = function (e) {
             cb(null, this.result);
           };
-          reader.readAsText(file);
+          if(encoding){
+            reader.readAsText(file, encoding);
+          }else{
+            reader.readAsArrayBuffer(file);
+          }
         }, cb);
       }else{
         cb(err);
       }
     });
   };
-
-  FS.prototype.getBlob = function (filename, cb) {
-    traverse(this.root, filename, function (err, entry) {
-      if(entry){
-        entry.file(function (blob) {
-          cb(null, blob);
-        }, cb);
-      }else{
-        cb(err);
-      }
-    });
-  };
-  
-  FS.prototype.getUrl = function (filename, cb) {
-    traverse(this.root, filename, function (err, entry) {
-      if(entry){
-        cb(null, entry.toURL());
-      }else{
-        cb(err);
-      }
-    });
-  };
-  
+    
   /**
      Writes a blob to a file, and returns fileEntry if succesful.
   */
@@ -301,29 +338,6 @@
           cb(new Error('Wrong filesize'));
         }
       }, cb);
-    }, cb);
-  };
-  
-  /**
-    Wipes the whole file system. 
-    
-    wipe(cb, [full])
-    
-    Use full = true if you want to wipe the root dir of the filesystem,
-    after doing this, the instance cannot be used anymore.
-  */
-  FS.prototype.wipe = function (cb, full) {
-    var self = this, folder = self.root.fullPath;
-    self.root.removeRecursively(function(){
-      if(!full){
-        self.fs.root.getDirectory(folder, {create:true}, function (root) {
-          self.root = root;
-          self._availableBytes = self._grantedBytes;
-          cb();
-        }, cb);
-      }else{
-        cb();
-      }
     }, cb);
   };
   
@@ -381,7 +395,7 @@
       }
     }
     
-    if(path == '/'){
+    if(path == '/' && path == ''){
       cb(null, root);
     }else{
       visit(root, path.split('/'), 0, cb);
