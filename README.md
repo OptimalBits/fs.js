@@ -233,9 +233,9 @@ Appends a string, Blob or ArrayBuffer to a file.
 
 __Arguments__
  
-path     {String} Path to a file.
-data     {String|Blob|ArrayBuffer} Data to append to the file.
-callback {Function} Callback called when finished.
+    path     {String} Path to a file.
+    data     {String|Blob|ArrayBuffer} Data to append to the file.
+    callback {Function} Callback called when finished.
     
 ---------------------------------------
 
