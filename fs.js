@@ -3,14 +3,15 @@
   
   A lightweight wrapper for the File System API inspired in nodejs fs module.
   
-  author: manuel@optimalbits.com
+  authors: manuel@optimalbits.com
+           linus@optimalbits.com
 */
-define(function() {
+(function() {
   
   window.StorageInfo = window.StorageInfo || window.webkitStorageInfo;
   window.RequestFileSystem = window.RequestFileSystem || window.webkitRequestFileSystem;
 
-  createFileSystem = function (size, folder, cb) {
+  var FSFactory = function (size, folder, cb) {
     folder = folder || 'fs_folder';
     window.StorageInfo.requestQuota(PERSISTENT, size, function (grantedBytes) {
       window.RequestFileSystem(PERSISTENT, grantedBytes, function (fs) {
@@ -364,5 +365,18 @@ define(function() {
     }
   }
   
-  return createFileSystem;
-});
+  // AMD define happens at the end for compatibility with AMD loaders
+  // that don't enforce next-turn semantics on modules.
+  if (typeof define === 'function' && define.amd) {
+    define(function() {
+      return FSFactory;
+    });
+  }else{
+    this.FSFactory = FSFactory;
+  }
+  
+}).call(this);
+
+
+
+
