@@ -18,7 +18,7 @@ define(['fs'], function(FSFactory) {
   describe('File', function() {
     var fs;
     
-    it('Created filesystem', function(done) {
+    it('Create filesystem', function(done) {
       FSFactory(1024 * 1024, 'filetest', function(err, filesystem) {
         expect(err).to.be(null);
         expect(filesystem).to.be.an(Object);
@@ -28,24 +28,29 @@ define(['fs'], function(FSFactory) {
     });
 
     it('Write file test.txt', function(done) {
-      var bb = new WebKitBlobBuilder();
-      bb.append(text1);
-      var blob = bb.getBlob('text/plain');
-
-      fs.write("test.txt", blob, function(err, fileEntry) {
+      fs.writeFile("test.txt", text1, function(err, fileEntry) {
         expect(err).to.be(null);
         expect(fileEntry).to.be.an(Object);
         done();
       });
     });
 
-    it('Read file test.txt', function(done) {
-      fs.read("test.txt", function(err, text) {
+    it('Read file test.txt as ArrayBuffer', function(done) {
+      fs.readFile("test.txt", function(err, data) {
         expect(err).to.be(null);
-        expect(text).to.be(text);
+        expect(data).to.be.an(ArrayBuffer);
         done();
       });
     });
+
+    it('Read file test.txt as text', function(done) {
+      fs.readFile("test.txt", 'UTF-8', function(err, text) {
+        expect(err).to.be(null);
+        expect(text).to.be.a('string');
+        done();
+      });
+    });
+    
     
     it('Rename file test.txt to renamed.txte', function(done) {
       fs.rename("test.txt", "renamed.txt", function(err) {
@@ -71,11 +76,7 @@ define(['fs'], function(FSFactory) {
     });
 
     it('Write persistent file test.txt', function(done) {
-      var bb = new WebKitBlobBuilder();
-      bb.append(text1);
-      var blob = bb.getBlob('text/plain');
-
-      fs.write("test.txt", blob, function(err, fileEntry) {
+      fs.writeFile("test.txt", text1, function(err, fileEntry) {
         expect(err).to.be(null);
         expect(fileEntry).to.be.an(Object);
         done();
@@ -93,23 +94,123 @@ define(['fs'], function(FSFactory) {
         done();
       });
     });
-  
-    it('Create new filesystem', function(done) {
+    
+    it('Create a directory', function(done){
+      fs.mkdir('/testdir', function(err){
+        expect(err).to.not.be.ok();
+        fs.exists('/testdir', function(exists){
+          expect(exists).to.be(true);
+          done();
+        })
+      });
+    });
+    
+    it('Create a subdirectory', function(done){
+      fs.mkdir('/testdir/subdir', function(err){
+        expect(err).to.not.be.ok();
+        fs.exists('/testdir/subdir', function(exists){
+          expect(exists).to.be(true);
+          done();
+        })
+      });
+    });
+    
+    it('Create a directory in a deep path', function(done){
+      fs.mkpath('/a/b/c/d', function(err){
+        expect(err).to.not.be.ok();
+        fs.exists('/a/b/c/d', function(exists){
+          expect(exists).to.be(true);
+          fs.exists('/a/b/c/e', function(exists){
+            expect(exists).to.be(false);
+            done();
+          });  
+        })
+        done();
+      });
+    });
+    
+    it('Remove a subdirectory', function(done){
+      fs.rmdir('/testdir/subdir', function(err){
+        expect(err).to.not.be.ok();
+        fs.exists('/testdir/subdir', function(exists){
+          expect(exists).to.be(false);
+          fs.exists('/testdir', function(exists){
+            expect(exists).to.be(true);
+            done();
+          });
+        }); 
+      })
+    });
+    
+    it('Remove a directory', function(done){
+      fs.rmdir('/testdir', function(err){
+        expect(err).to.not.be.ok();
+        fs.exists('/testdir', function(exists){
+          expect(exists).to.be(false);
+          done();
+        }); 
+      })
+    });
+    
+    it('Remove a subdirectory in a deep path', function(done){
+      fs.rmdir('/a/b/c/d', function(err){
+        expect(err).to.not.be.ok();
+        fs.exists('/a/b/c/d', function(exists){
+          expect(exists).to.be(false);
+          fs.exists('/a/b/c', function(exists){
+            expect(exists).to.be(true);
+            done();
+          });
+        }); 
+      })
+    });
+    
+    it('Read root entries', function(done){
+      fs.readdir('/a', function(err, entries){
+        console.log(entries);
+        expect(err).to.not.be.ok();
+        expect(entries).to.have.property('length');
+        expect(entries.length).to.be(1);
+        done()
+      });
+    });
+
+    it('Remove a deep path', function(done){
+      fs.rmdir('/a', function(err){
+        expect(err).to.not.be.ok();
+        fs.exists('/a', function(exists){
+          expect(exists).to.be(false);
+          fs.exists('/a/b', function(exists){
+            expect(exists).to.be(false);
+            fs.exists('/a/b/c', function(exists){
+              expect(exists).to.be(false);
+              done();
+            });
+          });
+        }); 
+      })
+    });
+    
+    it('Read root entries', function(done){
+      fs.readdir('/', function(err, entries){
+        expect(err).to.not.be.ok();
+        expect(entries).to.have.property('length');
+        expect(entries.length).to.be(1);
+        done()
+      });
+    });
+    
+    it('Open existing filesystem', function(done) {
       FSFactory(1024 * 1024, 'filetest', function(err, filesystem) {
         expect(err).to.be(null);
         expect(filesystem).to.be.an(Object);
-
         fs = filesystem;
         done();
       });
     });
 
     it('Write file test2.txt', function(done) {
-      var bb = new WebKitBlobBuilder();
-      bb.append(text2);
-      var blob = bb.getBlob('text/plain');
-
-      fs.write("test2.txt", blob, function(err, fileEntry) {
+      fs.writeFile("test2.txt", text2, function(err, fileEntry) {
         expect(err).to.be(null);
         expect(fileEntry).to.be.an(Object);
         done();
@@ -117,7 +218,7 @@ define(['fs'], function(FSFactory) {
     });
 
     it('Read file test.txt', function(done) {
-      fs.read("test.txt", function(err, text) {
+      fs.readFile("test.txt", 'utf-8', function(err, text) {
         expect(err).to.be(null);
         expect(text).to.be(text);
         done();
@@ -125,7 +226,7 @@ define(['fs'], function(FSFactory) {
     });
 
     it('Read file test2.txt', function(done) {
-      fs.read("test2.txt", function(err, text) {
+      fs.readFile("test2.txt", 'utf-8', function(err, text) {
         expect(err).to.be(null);
         expect(text).to.be(text2);
         done();
@@ -133,10 +234,7 @@ define(['fs'], function(FSFactory) {
     });
 
     it('Append text to test2.txt', function(done) {
-      var bb = new WebKitBlobBuilder();
-      bb.append(text1);
-      var blob = bb.getBlob('text/plain');
-      fs.append("test2.txt", blob, function(err, fileEntry) {
+      fs.appendFile("test2.txt", text1, function(err, fileEntry) {
         expect(err).to.be(null);
         expect(fileEntry).to.be.an(Object);
         done();
@@ -144,7 +242,7 @@ define(['fs'], function(FSFactory) {
     });
 
     it('Read file test2.txt', function(done) {
-      fs.read("test2.txt", function(err, text) {
+      fs.read("test2.txt", 'utf-8', function(err, text) {
         expect(err).to.be(null);
         expect(text).to.be(text2 + text1);
         done();
