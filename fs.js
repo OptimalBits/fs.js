@@ -5,6 +5,9 @@
   
   authors: manuel@optimalbits.com
            linus@optimalbits.com
+           
+  Licensed as MIT.
+   
 */
 (function() {
   
