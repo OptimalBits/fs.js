@@ -1,5 +1,4 @@
-fs.js
-=====
+##fs.js
 
 This module provides a wrapper for the HTML5 File System API inspired in nodejs fs module.
 While the underlying HTML5 API is quite feature rich, it is low level and difficult to use.
@@ -11,17 +10,31 @@ totally compatible with it. Also the module provides some useful methods that on
 make sense on a browser environment (such as getting the url pointing to a local file).
 
 
-Install
-=======
+##Install
 
 Just pick up fs.js and include it in a script tag or use it with an AMD compatible loader. 
 If you want to run the unit tests you can install the module via npm:
 
         npm install fs.js
-        
+       
+##Documentation
 
-Unit tests
-==========
+* [rename](#rename)
+* [stats](#stats)
+* [exists](#exists)
+* [remove](#remove)
+* [rmdir](#rmdir)
+* [mkdir](#mkdir)
+* [mkpath](#mkpath)
+* [readdir](#readdir)
+* [readFile](#readFile)
+* [readFileAsBlob](#readFileAsBlob)
+* [readFileAsUrl](#readFileAsUrl)
+* [writeFile](#writeFile)
+* [appendFile](#appendFile)
+* [wipe](#wipe)
+
+##Unit tests
 
 The unit tests are writte using mocha. For running the unit tests you need to use node and a webbrowser
 with File System API capabilities (only Chrome at the moment).
@@ -33,8 +46,7 @@ Go to the test directory and run the test server:
 Open a webbrowser pointing to http://localhost:8080
 
 
-Quick Start
-===========
+##Quick Start
 
 Start by creating a file system. Note that we support a prefix for every file system.
 This prefix allows us to have several independent file systems:
@@ -53,7 +65,7 @@ Check the methods section for all the methods provided by the file system object
 
 ## Methods
 
-<a name="remove"/>
+<a name="rename"/>
 
 Renames a file or directory.
 
