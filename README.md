@@ -36,7 +36,7 @@ If you want to run the unit tests you can install the module via npm:
 
 ##Unit tests
 
-The unit tests are writte using mocha. For running the unit tests you need to use node and a webbrowser
+The unit tests are written using mocha. For running the unit tests you need to use node and a webbrowser
 with File System API capabilities (only Chrome at the moment).
 
 Go to the test directory and run the test server:
