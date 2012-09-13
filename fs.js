@@ -419,7 +419,7 @@
     var counter = 0, length = entries.length, error;
     for(var i=0; i < length; i++){
       fn(entries[i], function(err){
-        error = error || err;
+        error = error || err;
         counter++;
         if(counter==length){
           cb(error);
