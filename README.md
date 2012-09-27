@@ -9,6 +9,7 @@ Note that this module is *inspired* by node js, not a port, and will therefore n
 totally compatible with it. Also the module provides some useful methods that only
 make sense on a browser environment (such as getting the url pointing to a local file).
 
+Follow [optimalbits](http://twitter.com/optimalbits) for news and updates regarding this library.
 
 ##Install
 
