@@ -12,7 +12,7 @@
 (function() {
   
   window.StorageInfo = window.StorageInfo || window.webkitStorageInfo;
-  window.RequestFileSystem = window.RequestFileSystem || window.webkitRequestFileSystem;
+  window.RequestFileSystem = window.RequestFileSystem || window.webkitRequestFileSystem; 
 
   var FSFactory = function (size, folder, cb) {
     folder = folder || 'fs_folder';
@@ -239,17 +239,13 @@
     },
     
     writeFile : function(filename, data, cb){
-      var bb = new WebKitBlobBuilder();
-      bb.append(data); 
-      this.write(filename, bb.getBlob(), cb);
+      this.write(filename, newBlob(data), cb);
     },
     
     appendFile : function(filename, data, cb){
-      var bb = new WebKitBlobBuilder();
-      bb.append(data);
-      this.append(filename, bb.getBlob(), cb);
+      this.append(filename, newBlob(data), cb);
     },
-    
+        
     /**
       Wipes the whole file system. 
       
@@ -428,6 +424,17 @@
     }
   }
   
+  function newBlob(data){
+    var BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder;
+    if(BlobBuilder){
+      var bb = new BlobBuilder();
+      bb.append(data);
+      return bb.getBlob();
+    } else {
+      return new Blob([data]);
+    }
+  }
+
   // AMD define happens at the end for compatibility with AMD loaders
   // that don't enforce next-turn semantics on modules.
   if (typeof define === 'function' && define.amd) {
